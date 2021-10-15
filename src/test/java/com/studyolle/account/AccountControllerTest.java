@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -25,6 +26,20 @@ class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/sign-up"))
                 .andExpect(model().attributeExists("signUpForm"))
+        ;
+    }
+
+    @DisplayName("회원가입 처리 - 입력값 오류")
+    @Test
+    public void signUpFormWithWrongInput() throws Exception {
+        mockMvc.perform(post("/sign-up")
+                .param("nickname", "jinhyeok")
+                .param("email", "email....")
+                .param("password", "12345")
+                .with(csrf())
+        )
+                .andExpect(status().isOk())
+                .andExpect(view().name("account/sign-up"))
         ;
     }
 }
