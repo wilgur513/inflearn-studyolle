@@ -42,16 +42,11 @@ public class AccountController {
 
     @GetMapping("/check-email-token")
     public String checkEmailToken(String token, String email, Model model) {
-        Account account = accountRepository.findByEmail(email);
         String view = "account/checked-email";
+        Account account = accountRepository.findByEmail(email);
 
-        if (account == null) {
-            model.addAttribute("error", "wrong.email");
-            return view;
-        }
-
-        if (!account.getEmailCheckToken().equals(token)) {
-            model.addAttribute("error", "wrong.token");
+        if (account == null || !account.isValidToken(token)) {
+            model.addAttribute("error", "wrong");
             return view;
         }
 
@@ -60,4 +55,5 @@ public class AccountController {
         model.addAttribute("nickname", account.getNickname());
         return view;
     }
+
 }
