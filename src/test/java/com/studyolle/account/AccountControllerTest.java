@@ -17,6 +17,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,6 +43,7 @@ class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/sign-up"))
                 .andExpect(model().attributeExists("signUpForm"))
+                .andExpect(unauthenticated())
         ;
     }
 
@@ -55,6 +58,7 @@ class AccountControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/sign-up"))
+                .andExpect(unauthenticated())
         ;
     }
 
@@ -69,6 +73,7 @@ class AccountControllerTest {
         )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"))
+                .andExpect(authenticated())
         ;
 
         Account account = accountRepository.findByEmail("jinhyeok@email.com");
@@ -88,6 +93,7 @@ class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/checked-email"))
                 .andExpect(model().attributeExists("error"))
+                .andExpect(unauthenticated())
         ;
     }
 
@@ -111,6 +117,7 @@ class AccountControllerTest {
                 .andExpect(model().attributeDoesNotExist("error"))
                 .andExpect(model().attributeExists("nickname"))
                 .andExpect(model().attributeExists("numberOfUser"))
+                .andExpect(authenticated())
         ;
     }
 }
