@@ -3,12 +3,14 @@
 <head th:replace="fragments.html :: head" />
 <body class="bg-light">
     <div th:replace="fragments.html :: main-nav" />
-
+    <!--/*@thymesVar id="account" type="com.studyolle.domain.Account"*/-->
+    <div class="alert alert-warning" role="alert" th:if="${account != null && !account.emailVerified}">
+        스터디올래 가입을 완료하려면 <a href="@{/check-email}" class="alert-link">계정 인증 이메일을 확인</a>하세요.
+    </div>
     <div class="container">
         <div class="py-5 text-center">
             <h2>스터디올래</h2>
         </div>
-
         <div th:replace="fragments.html :: footer" />
     </div>
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
