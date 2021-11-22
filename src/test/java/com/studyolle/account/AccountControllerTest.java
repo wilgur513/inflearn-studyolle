@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.studyolle.domain.Account;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,5 +162,26 @@ class AccountControllerTest {
         mockMvc.perform(get("/resend-confirm-email"))
             .andDo(print())
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("일반 사용자가 이메일 재전송 요청 성공")
+    void resendEmailWithAccount() throws Exception {
+        Account account = Account.builder()
+            .nickname("nickname")
+            .email("email@email.com")
+            .password("password")
+            .build();
+        account.generateEmailCheckToken();
+        account.setEmailCheckTokenCreatedAt(LocalDateTime.now().minusHours(2L));
+        accountRepository.save(account);
+
+        mockMvc.perform(get("/resend-confirm-email")
+            .with(user(new UserAccount(account)))
+        )
+            .andDo(print())
+            .andExpect(status().is3xxRedirection())
+            .andExpect(view().name("redirect:/"))
+        ;
     }
 }
