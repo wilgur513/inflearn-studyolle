@@ -3,6 +3,8 @@ package com.studyolle.account;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -183,6 +185,8 @@ class AccountControllerTest {
             .andExpect(status().is3xxRedirection())
             .andExpect(view().name("redirect:/"))
         ;
+
+        verify(javaMailSender, times(1)).send(any(SimpleMailMessage.class));
     }
 
     @Test
@@ -205,5 +209,7 @@ class AccountControllerTest {
             .andExpect(view().name("redirect:account/check-email"))
             .andExpect(model().attributeExists("error"))
         ;
+
+        verify(javaMailSender, never()).send(any(SimpleMailMessage.class));
     }
 }
