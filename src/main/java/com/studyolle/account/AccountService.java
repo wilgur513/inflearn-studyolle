@@ -41,6 +41,12 @@ public class AccountService {
         return newAccount;
     }
 
+    @Transactional
+    public void resendEmail(Account account) {
+        account.generateEmailCheckToken();
+        sendSignUpConfirmEmail(account);
+    }
+
     private void sendSignUpConfirmEmail(Account account) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setSubject("스터디올래, 회원가입 인증!");
