@@ -3,7 +3,12 @@
 <head th:replace="fragments.html :: head" />
 <body class="bg-light">
   <div th:replace="fragments.html :: main-nav" />
-  <div class="py-5 text-center">
+  <div class="py-5 text-center" th:if="${error != null}">
+    <h2>
+      이메일 재전송은 한시간에 한번 가능합니다. 한시간 후에 검증 메일을 전송하세요.
+    </h2>
+  </div>
+  <div class="py-5 text-center" th:if="${error == null}">
     <h2>
       이메일 검증이 필요합니다. <br>
       <span th:text="${nickname}">닉네임</span>님의 이메일은 <span th:text="${email}">이메일</span>입니다.
