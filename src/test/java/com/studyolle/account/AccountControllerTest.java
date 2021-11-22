@@ -205,8 +205,8 @@ class AccountControllerTest {
             .with(user(new UserAccount(account)))
         )
             .andDo(print())
-            .andExpect(status().is3xxRedirection())
-            .andExpect(view().name("redirect:account/check-email"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("account/check-email"))
             .andExpect(model().attributeExists("error"))
         ;
 

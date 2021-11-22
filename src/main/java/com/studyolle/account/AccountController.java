@@ -55,14 +55,13 @@ public class AccountController {
     }
 
     @GetMapping("/resend-confirm-email")
-    public String resendConfirmEmail(@CurrentUser Account account, RedirectAttributes attributes) {
+    public String resendConfirmEmail(@CurrentUser Account account, Model model) {
         if (account.getEmailCheckTokenCreatedAt().isBefore(LocalDateTime.now().minusHours(1L))) {
             accountService.resendEmail(account);
             return "redirect:/";
         }
-
-        attributes.addAttribute("error", "wrong");
-        return "redirect:account/check-email";
+        model.addAttribute("error", "wrong");
+        return "account/check-email";
     }
 
     @GetMapping("/check-email-token")
