@@ -55,7 +55,7 @@ public class AccountController {
     @GetMapping("/resend-confirm-email")
     public String resendConfirmEmail(@CurrentUser Account account, Model model) {
         if (account.canResendEmail()) {
-            accountService.resendEmail(account);
+            accountService.sendSignUpConfirmEmail(account);
             return "redirect:/";
         }
         model.addAttribute("error", "wrong");
