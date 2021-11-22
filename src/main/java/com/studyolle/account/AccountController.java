@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -56,7 +54,7 @@ public class AccountController {
 
     @GetMapping("/resend-confirm-email")
     public String resendConfirmEmail(@CurrentUser Account account, Model model) {
-        if (account.getEmailCheckTokenCreatedAt().isBefore(LocalDateTime.now().minusHours(1L))) {
+        if (account.canResendEmail()) {
             accountService.resendEmail(account);
             return "redirect:/";
         }

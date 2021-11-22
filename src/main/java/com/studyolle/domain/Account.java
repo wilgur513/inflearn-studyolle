@@ -65,4 +65,8 @@ public class Account {
     public boolean isValidToken(String token) {
         return emailCheckToken.equals(token);
     }
+
+    public boolean canResendEmail() {
+        return emailCheckTokenCreatedAt.isBefore(LocalDateTime.now().minusHours(1L));
+    }
 }
