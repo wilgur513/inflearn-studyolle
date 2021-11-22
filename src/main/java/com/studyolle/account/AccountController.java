@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 
 @Controller
 @RequiredArgsConstructor
@@ -39,6 +40,17 @@ public class AccountController {
         Account account = accountService.processNewAccount(signUpForm);
         accountService.login(account);
         return "redirect:/";
+    }
+
+    @GetMapping("/check-email")
+    public String checkEmail(@CurrentUser Account account, Model model) {
+        if(account == null) {
+            return "redirect:/";
+        }
+
+        model.addAttribute("nickname", account.getNickname());
+        model.addAttribute("email", account.getEmail());
+        return "account/check-email";
     }
 
     @GetMapping("/check-email-token")
