@@ -154,4 +154,12 @@ class AccountControllerTest {
             .andExpect(model().attribute("nickname", "nickname"))
             .andExpect(model().attribute("email", "email@email.com"));
     }
+
+    @Test
+    @DisplayName("익명 사용자 이메일 재전송 요청")
+    void resendEmailWithAnonymous() throws Exception {
+        mockMvc.perform(get("/resend-confirm-email"))
+            .andDo(print())
+            .andExpect(status().isForbidden());
+    }
 }
