@@ -25,6 +25,8 @@ public class Account {
 
     private String emailCheckToken;
 
+    private LocalDateTime emailCheckTokenCreatedAt;
+
     private LocalDateTime joinedAt;
 
     private String bio;
@@ -52,6 +54,7 @@ public class Account {
 
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
+        this.emailCheckTokenCreatedAt = LocalDateTime.now();
     }
 
     public void completeSignUp() {
