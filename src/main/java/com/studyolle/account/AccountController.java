@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -51,6 +52,17 @@ public class AccountController {
         model.addAttribute("nickname", account.getNickname());
         model.addAttribute("email", account.getEmail());
         return "account/check-email";
+    }
+
+    @GetMapping("/resend-confirm-email")
+    public String resendConfirmEmail(@CurrentUser Account account, RedirectAttributes attributes) {
+        if (account.getEmailCheckTokenCreatedAt().isBefore(LocalDateTime.now().minusHours(1L))) {
+            accountService.resendEmail(account);
+            return "redirect:/";
+        }
+
+        attributes.addAttribute("error", "wrong");
+        return "redirect:account/check-email";
     }
 
     @GetMapping("/check-email-token")
