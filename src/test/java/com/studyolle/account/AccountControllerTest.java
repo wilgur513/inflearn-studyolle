@@ -184,4 +184,26 @@ class AccountControllerTest {
             .andExpect(view().name("redirect:/"))
         ;
     }
+
+    @Test
+    @DisplayName("이메일 재전송 후 1시간 안에 다시 재전송")
+    void resendEmailWithAccountBefore1Hour() throws Exception {
+        Account account = Account.builder()
+            .nickname("nickname")
+            .email("email@email.com")
+            .password("password")
+            .build();
+        account.generateEmailCheckToken();
+        account.setEmailCheckTokenCreatedAt(LocalDateTime.now().minusMinutes(30L));
+        accountRepository.save(account);
+
+        mockMvc.perform(get("/resend-confirm-email")
+            .with(user(new UserAccount(account)))
+        )
+            .andDo(print())
+            .andExpect(status().is3xxRedirection())
+            .andExpect(view().name("redirect:account/check-email"))
+            .andExpect(model().attributeExists("error"))
+        ;
+    }
 }
