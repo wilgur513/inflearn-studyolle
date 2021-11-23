@@ -8,6 +8,7 @@ import static org.springframework.security.test.web.servlet.response.SecurityMoc
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -120,4 +121,19 @@ class MainControllerTest {
             .andExpect(redirectedUrl("/"))
             .andExpect(unauthenticated());
     }
+
+    @Test
+    @DisplayName("로그인 시 Remember Me 사용 테스트")
+    void rememberMe() throws Exception {
+        mockMvc.perform(post("/login")
+            .param("username", "username")
+            .param("password", "password")
+            .param("remember-me", "true")
+            .with(csrf())
+        )
+            .andDo(print())
+            .andExpect(status().is3xxRedirection())
+            .andExpect(cookie().exists("remember-me"));
+    }
+
 }
