@@ -71,6 +71,14 @@ class MainControllerTest {
             .andExpect(view().name("index"));
     }
 
+    @Test
+    @DisplayName("로그인 페이지")
+    void loginPage() throws Exception {
+        mockMvc.perform(get("/login"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("login"));
+    }
+
     @ParameterizedTest(name="아이디 : {0}")
     @ValueSource(strings={"email@email.com", "username"})
     @DisplayName("이메일 또는 닉네임 로그인 테스트")
