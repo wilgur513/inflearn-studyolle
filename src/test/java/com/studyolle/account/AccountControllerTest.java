@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.studyolle.domain.Account;
 import java.time.LocalDateTime;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @AutoConfigureMockMvc
 class AccountControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -43,14 +45,27 @@ class AccountControllerTest {
     @MockBean
     private JavaMailSender javaMailSender;
 
+    Account account;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        account = Account.builder()
+            .email("email@email.com")
+            .nickname("nickname")
+            .password("password")
+            .build();
+        account.generateEmailCheckToken();
+        accountRepository.save(account);
+    }
+
     @DisplayName("회원가입 화면 보이는지 테스트")
     @Test
     public void signUpForm() throws Exception {
         mockMvc.perform(get("/sign-up"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("account/sign-up"))
-                .andExpect(model().attributeExists("signUpForm"))
-                .andExpect(unauthenticated())
+            .andExpect(status().isOk())
+            .andExpect(view().name("account/sign-up"))
+            .andExpect(model().attributeExists("signUpForm"))
+            .andExpect(unauthenticated())
         ;
     }
 
@@ -58,14 +73,14 @@ class AccountControllerTest {
     @Test
     public void signUpFormWithWrongInput() throws Exception {
         mockMvc.perform(post("/sign-up")
-                .param("nickname", "jinhyeok")
-                .param("email", "email....")
-                .param("password", "12345")
-                .with(csrf())
+            .param("nickname", "jinhyeok")
+            .param("email", "email....")
+            .param("password", "12345")
+            .with(csrf())
         )
-                .andExpect(status().isOk())
-                .andExpect(view().name("account/sign-up"))
-                .andExpect(unauthenticated())
+            .andExpect(status().isOk())
+            .andExpect(view().name("account/sign-up"))
+            .andExpect(unauthenticated())
         ;
     }
 
@@ -73,14 +88,14 @@ class AccountControllerTest {
     @Test
     public void signUpFormWithCorrectInput() throws Exception {
         mockMvc.perform(post("/sign-up")
-                .param("nickname", "jinhyeok")
-                .param("email", "jinhyeok@email.com")
-                .param("password", "12345678")
-                .with(csrf())
+            .param("nickname", "jinhyeok")
+            .param("email", "jinhyeok@email.com")
+            .param("password", "12345678")
+            .with(csrf())
         )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/"))
-                .andExpect(authenticated())
+            .andExpect(status().is3xxRedirection())
+            .andExpect(view().name("redirect:/"))
+            .andExpect(authenticated())
         ;
 
         Account account = accountRepository.findByEmail("jinhyeok@email.com");
@@ -94,37 +109,29 @@ class AccountControllerTest {
     @Test
     public void checkEmailTokenWithWrongInput() throws Exception {
         mockMvc.perform(get("/check-email-token")
-                .param("token", "invalid-token")
-                .param("email", "email@email.com")
+            .param("token", "invalid-token")
+            .param("email", "email@email.com")
         )
-                .andExpect(status().isOk())
-                .andExpect(view().name("account/checked-email"))
-                .andExpect(model().attributeExists("error"))
-                .andExpect(unauthenticated())
+            .andExpect(status().isOk())
+            .andExpect(view().name("account/checked-email"))
+            .andExpect(model().attributeExists("error"))
+            .andExpect(unauthenticated())
         ;
     }
 
     @DisplayName("인증 메일 확인 - 입력값 정상")
     @Test
     public void checkEmailTokenWithCorrectInput() throws Exception {
-        Account account = Account.builder()
-                .email("email@email.com")
-                .nickname("nickname")
-                .password("password")
-                .build();
-        accountRepository.save(account);
-        account.generateEmailCheckToken();
-
         mockMvc.perform(get("/check-email-token")
-                .param("token", account.getEmailCheckToken())
-                .param("email", account.getEmail())
+            .param("token", account.getEmailCheckToken())
+            .param("email", account.getEmail())
         )
-                .andExpect(status().isOk())
-                .andExpect(view().name("account/checked-email"))
-                .andExpect(model().attributeDoesNotExist("error"))
-                .andExpect(model().attributeExists("nickname"))
-                .andExpect(model().attributeExists("numberOfUser"))
-                .andExpect(authenticated())
+            .andExpect(status().isOk())
+            .andExpect(view().name("account/checked-email"))
+            .andExpect(model().attributeDoesNotExist("error"))
+            .andExpect(model().attributeExists("nickname"))
+            .andExpect(model().attributeExists("numberOfUser"))
+            .andExpect(authenticated())
         ;
     }
 
@@ -139,14 +146,6 @@ class AccountControllerTest {
     @Test
     @DisplayName("로그인한 사용자가 이메일 재확인")
     void checkEmailWithAccount() throws Exception {
-        Account account = Account.builder()
-            .email("email@email.com")
-            .nickname("nickname")
-            .password("password")
-            .build();
-        accountRepository.save(account);
-        account.generateEmailCheckToken();
-
         mockMvc.perform(get("/check-email")
             .with(user(new UserAccount(account)))
         )
@@ -168,12 +167,6 @@ class AccountControllerTest {
     @Test
     @DisplayName("일반 사용자가 이메일 재전송 요청 성공")
     void resendEmailWithAccount() throws Exception {
-        Account account = Account.builder()
-            .nickname("nickname")
-            .email("email@email.com")
-            .password("password")
-            .build();
-        account.generateEmailCheckToken();
         account.setEmailCheckTokenCreatedAt(LocalDateTime.now().minusHours(2L));
         accountRepository.save(account);
 
@@ -191,12 +184,6 @@ class AccountControllerTest {
     @Test
     @DisplayName("이메일 재전송 후 1시간 안에 다시 재전송")
     void resendEmailWithAccountBefore1Hour() throws Exception {
-        Account account = Account.builder()
-            .nickname("nickname")
-            .email("email@email.com")
-            .password("password")
-            .build();
-        account.generateEmailCheckToken();
         account.setEmailCheckTokenCreatedAt(LocalDateTime.now().minusMinutes(30L));
         accountRepository.save(account);
 
