@@ -2,6 +2,7 @@ package com.studyolle.main;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -53,5 +54,19 @@ class MainControllerTest {
             .andExpect(status().is3xxRedirection())
             .andExpect(redirectedUrl("/"))
             .andExpect(authenticated().withUsername("username"));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 테스트")
+    void loginFail() throws Exception {
+        mockMvc.perform(post("/login")
+            .param("username", "invalid")
+            .param("password", "invalid")
+            .with(csrf())
+        )
+            .andDo(print())
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/login?error"))
+            .andExpect(unauthenticated());
     }
 }
