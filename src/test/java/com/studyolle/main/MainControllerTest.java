@@ -1,16 +1,23 @@
 package com.studyolle.main;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.SignUpForm;
+import com.studyolle.account.UserAccount;
+import com.studyolle.domain.Account;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +39,8 @@ class MainControllerTest {
     MockMvc mockMvc;
     @Autowired
     AccountService accountService;
+    @Autowired
+    AccountRepository accountRepository;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -39,6 +49,17 @@ class MainControllerTest {
         form.setEmail("email@email.com");
         form.setPassword("password");
         accountService.processNewAccount(form);
+    }
+
+    @Test
+    @DisplayName("일반 사용자 루트 페이지 접근 테스트")
+    void indexWithAccount() throws Exception {
+        Account account = accountRepository.findByNickname("username");
+        mockMvc.perform(get("/").with(user(new UserAccount(account))))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeExists("account"))
+            .andExpect(view().name("index"))
+            .andExpect(authenticated().withUsername("username"));
     }
 
     @ParameterizedTest(name="아이디 : {0}")
