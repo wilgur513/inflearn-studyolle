@@ -62,6 +62,15 @@ class MainControllerTest {
             .andExpect(authenticated().withUsername("username"));
     }
 
+    @Test
+    @DisplayName("익명 사용자 루트 페이지 접근 테스트")
+    void indexWithAnonymous() throws Exception {
+        mockMvc.perform(get("/"))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeDoesNotExist("account"))
+            .andExpect(view().name("index"));
+    }
+
     @ParameterizedTest(name="아이디 : {0}")
     @ValueSource(strings={"email@email.com", "username"})
     @DisplayName("이메일 또는 닉네임 로그인 테스트")
