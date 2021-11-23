@@ -19,6 +19,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll()
                 .anyRequest().authenticated()
         ;
+
+        http.formLogin()
+            .loginPage("/login").permitAll();
+        http.logout()
+            .logoutSuccessUrl("/");
     }
 
     @Override
@@ -27,6 +32,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers("/node_modules/**")
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
         ;
-
     }
 }
