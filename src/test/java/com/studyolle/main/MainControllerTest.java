@@ -1,5 +1,6 @@
 package com.studyolle.main;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -136,4 +137,12 @@ class MainControllerTest {
             .andExpect(cookie().exists("remember-me"));
     }
 
+    @Test
+    @DisplayName("로그인 시 Remember Me 미사용 테스트")
+    void notUsingRememberMe() throws Exception {
+        mockMvc.perform(formLogin("/login").user("username").password("password"))
+            .andDo(print())
+            .andExpect(status().is3xxRedirection())
+            .andExpect(cookie().doesNotExist("remember-me"));
+    }
 }
