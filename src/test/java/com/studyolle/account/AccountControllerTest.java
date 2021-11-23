@@ -209,4 +209,20 @@ class AccountControllerTest {
             .andExpect(model().attribute("account", account));
     }
 
+    @Test
+    @DisplayName("다른 사용자 프로필 조회")
+    void profileWithOther() throws Exception {
+        Account other = Account.builder()
+            .email("other@other.com")
+            .nickname("other")
+            .password("password")
+            .build();
+        accountRepository.save(other);
+
+        mockMvc.perform(get("/profile/nickname").with(user(new UserAccount(other))))
+            .andExpect(status().isOk())
+            .andExpect(view().name("account/profile"))
+            .andExpect(model().attribute("isOwner", false))
+            .andExpect(model().attribute("account", account));
+    }
 }
