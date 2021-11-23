@@ -44,10 +44,6 @@ public class AccountController {
 
     @GetMapping("/check-email")
     public String checkEmail(@CurrentUser Account account, Model model) {
-        if(account == null) {
-            return "redirect:/";
-        }
-
         model.addAttribute("nickname", account.getNickname());
         model.addAttribute("email", account.getEmail());
         return "account/check-email";

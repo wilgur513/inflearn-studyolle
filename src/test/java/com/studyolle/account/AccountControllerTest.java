@@ -133,7 +133,7 @@ class AccountControllerTest {
     void checkEmailWithAnonymous() throws Exception {
         mockMvc.perform(get("/check-email"))
             .andDo(print())
-            .andExpect(status().isForbidden());
+            .andExpect(status().is3xxRedirection());
     }
 
     @Test
@@ -162,7 +162,7 @@ class AccountControllerTest {
     void resendEmailWithAnonymous() throws Exception {
         mockMvc.perform(get("/resend-confirm-email"))
             .andDo(print())
-            .andExpect(status().isForbidden());
+            .andExpect(status().is3xxRedirection());
     }
 
     @Test
