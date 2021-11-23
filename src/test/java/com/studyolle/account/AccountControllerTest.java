@@ -198,4 +198,15 @@ class AccountControllerTest {
 
         verify(javaMailSender, never()).send(any(SimpleMailMessage.class));
     }
+
+    @Test
+    @DisplayName("본인 프로필 조회 테스트")
+    void profileWithOwner() throws Exception {
+        mockMvc.perform(get("/profile/nickname").with(user(new UserAccount(account))))
+            .andExpect(status().isOk())
+            .andExpect(view().name("account/profile"))
+            .andExpect(model().attribute("isOwner", true))
+            .andExpect(model().attribute("account", account));
+    }
+
 }
