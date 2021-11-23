@@ -1,6 +1,7 @@
 package com.studyolle.main;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -67,6 +67,19 @@ class MainControllerTest {
             .andDo(print())
             .andExpect(status().is3xxRedirection())
             .andExpect(redirectedUrl("/login?error"))
+            .andExpect(unauthenticated());
+    }
+
+    @Test
+    @DisplayName("로그아웃 테스트")
+    void logout() throws Exception {
+        mockMvc.perform(post("/logout")
+            .with(csrf())
+            .with(user("username"))
+        )
+            .andDo(print())
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/"))
             .andExpect(unauthenticated());
     }
 }
