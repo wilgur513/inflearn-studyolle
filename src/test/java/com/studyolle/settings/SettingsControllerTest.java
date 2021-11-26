@@ -49,4 +49,12 @@ class SettingsControllerTest {
 		    .andExpect(view().name("settings/profile"));
 	}
 
+	@Test
+	@DisplayName("익명 사용자 프로필 업데이트 폼 접근 제한")
+	void anonymousProfileUpdateForm() throws Exception {
+	    mockMvc.perform(get("/settings/profile"))
+		    .andExpect(status().is3xxRedirection())
+		    .andExpect(redirectedUrlPattern("**/login"));
+	}
+
 }
