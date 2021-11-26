@@ -1,5 +1,6 @@
 package com.studyolle.account;
 
+import com.studyolle.settings.Profile;
 import java.util.Set;
 
 import org.springframework.mail.SimpleMailMessage;
@@ -80,5 +81,13 @@ public class AccountService implements UserDetailsService {
 		}
 
 		return new UserAccount(account);
+	}
+
+	public void updateProfile(Account account, Profile profile) {
+		account.setUrl(profile.getUrl());
+		account.setBio(profile.getBio());
+		account.setLocation(profile.getLocation());
+		account.setOccupation(profile.getOccupation());
+		accountRepository.save(account);
 	}
 }
