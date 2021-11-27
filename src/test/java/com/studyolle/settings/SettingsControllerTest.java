@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,9 @@ class SettingsControllerTest {
 
 	@Autowired
 	AccountRepository accountRepository;
+
+	@Autowired
+	PasswordEncoder passwordEncoder;
 
 	Account account;
 
@@ -104,4 +108,51 @@ class SettingsControllerTest {
 		assertThat(notUpdatedAccount.getBio()).isBlank();
 	}
 
+	@Test
+	@DisplayName("패스워드 변경 폼 페이지")
+	void updatePasswordForm() throws Exception {
+	    mockMvc.perform(get("/settings/password")
+	        .with(user(new UserAccount(account)))
+	    )
+		    .andExpect(status().isOk())
+		    .andExpect(model().attributeExists("account"))
+		    .andExpect(model().attributeExists("passwordForm"))
+		    .andExpect(view().name("settings/password"));
+	}
+
+	@Test
+	@DisplayName("정상적인 패스워드 변경")
+	void updatePassword() throws Exception {
+	    mockMvc.perform(post("/settings/password")
+	        .with(user(new UserAccount(account)))
+		    .with(csrf())
+		    .param("newPassword", "newPassword")
+		    .param("newPasswordConfirm", "newPassword")
+	    )
+		    .andExpect(status().is3xxRedirection())
+		    .andExpect(redirectedUrl("/settings/password"))
+		    .andExpect(flash().attributeExists("message"));
+
+	    Account updatedAccount = accountRepository.findByNickname("nickname");
+	    assertThat(passwordEncoder.matches("newPassword", updatedAccount.getPassword())).isTrue();
+	}
+
+	@Test
+	@DisplayName("잘못된 패스워드 변경")
+	void updatePasswordFail() throws Exception {
+	    mockMvc.perform(post("/settings/password")
+	        .with(user(new UserAccount(account)))
+		    .with(csrf())
+		    .param("newPassword", "12345678")
+		    .param("newPasswordConfirm", "87654321")
+	    )
+		    .andExpect(status().isOk())
+		    .andExpect(model().hasErrors())
+		    .andExpect(model().attributeExists("account"))
+		    .andExpect(model().attributeExists("passwordForm"))
+		    .andExpect(view().name("settings/password"));
+
+	    Account notUpdatedAccount = accountRepository.findByNickname("nickname");
+	    assertThat(notUpdatedAccount.getPassword()).isEqualTo("password");
+	}
 }
