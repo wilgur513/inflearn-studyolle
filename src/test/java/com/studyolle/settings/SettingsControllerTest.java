@@ -71,6 +71,7 @@ class SettingsControllerTest {
 			.param("location", "new location")
 			.param("occupation", "new occupation")
 			.param("url", "new url")
+			.param("profileImage", "new profileImage")
 		)
 			.andExpect(status().is3xxRedirection())
 			.andExpect(view().name("redirect:/settings/profile"))
@@ -81,6 +82,7 @@ class SettingsControllerTest {
 		assertThat(updatedAccount.getUrl()).isEqualTo("new url");
 		assertThat(updatedAccount.getLocation()).isEqualTo("new location");
 		assertThat(updatedAccount.getOccupation()).isEqualTo("new occupation");
+		assertThat(updatedAccount.getProfileImage()).isEqualTo("new profileImage");
 	}
 
 	@Test
