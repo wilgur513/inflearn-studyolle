@@ -211,4 +211,73 @@ class SettingsControllerTest {
 	    Account notUpdatedAccount = accountRepository.findByNickname("nickname");
 	    assertThat(notUpdatedAccount.isStudyUpdatedByEmail()).isFalse();
 	}
+
+	@Test
+	@DisplayName("닉네임 수정 폼 페이지")
+	void updateNicknameForm() throws Exception {
+	    mockMvc.perform(get("/settings/account")
+	        .with(user(new UserAccount(account)))
+	    )
+		    .andExpect(status().isOk())
+		    .andExpect(model().attributeExists("account"))
+		    .andExpect(model().attributeExists("nicknameForm"))
+		    .andExpect(view().name("settings/account"));
+	}
+
+	@Test
+	@DisplayName("정상적인 닉네임 수정")
+	void updateNickname() throws Exception {
+		mockMvc.perform(post("/settings/account")
+			.with(user(new UserAccount(account)))
+			.with(csrf())
+			.param("nickname", "new_nickname")
+		)
+			.andExpect(status().is3xxRedirection())
+			.andExpect(flash().attributeExists("message"))
+			.andExpect(redirectedUrl("/settings/account"));
+
+		assertThat(accountRepository.findByNickname("new_nickname")).isNotNull();
+		assertThat(accountRepository.findByNickname("nickname")).isNull();
+	}
+
+	@Test
+	@DisplayName("중복된 닉네임 수정")
+	void updateDuplicateNickname() throws Exception {
+	    Account other = Account.builder()
+		    .nickname("other")
+		    .email("other@email.com")
+		    .password("password")
+		    .build();
+	    accountRepository.save(other);
+
+        mockMvc.perform(post("/settings/account")
+	        .with(user(new UserAccount(account)))
+	        .with(csrf())
+	        .param("nickname", "other")
+	    )
+	        .andExpect(status().isOk())
+	        .andExpect(model().hasErrors())
+	        .andExpect(model().attributeExists("account"))
+	        .andExpect(model().attributeExists("nicknameForm"))
+	        .andExpect(view().name("settings/account"));
+
+        assertThat(accountRepository.findByNickname("nickname")).isNotNull();
+	}
+
+	@Test
+	@DisplayName("비정상적인 닉네임 수정")
+	void updateNicknameFail() throws Exception {
+	    mockMvc.perform(post("/settings/account")
+	        .with(user(new UserAccount(account)))
+		    .with(csrf())
+		    .param("nickname", "has space")
+	    )
+		    .andExpect(status().isOk())
+		    .andExpect(model().hasErrors())
+		    .andExpect(model().attributeExists("account"))
+		    .andExpect(model().attributeExists("nicknameForm"));
+
+	    assertThat(accountRepository.findByNickname("nickname")).isNotNull();
+	    assertThat(accountRepository.findByNickname("has space")).isNull();
+	}
 }

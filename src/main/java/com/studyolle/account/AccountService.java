@@ -1,6 +1,7 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
+import com.studyolle.settings.NicknameForm;
 import com.studyolle.settings.Notifications;
 import com.studyolle.settings.Profile;
 import java.util.Set;
@@ -95,5 +96,11 @@ public class AccountService implements UserDetailsService {
 	public void updateNotifications(Account account, Notifications notifications) {
 		modelMapper.map(notifications, account);
 		accountRepository.save(account);
+	}
+
+	public void updateNickname(Account account, NicknameForm nicknameForm) {
+		account.setNickname(nicknameForm.getNickname());
+		accountRepository.save(account);
+		login(account);
 	}
 }
