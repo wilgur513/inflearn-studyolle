@@ -155,4 +155,60 @@ class SettingsControllerTest {
 	    Account notUpdatedAccount = accountRepository.findByNickname("nickname");
 	    assertThat(notUpdatedAccount.getPassword()).isEqualTo("password");
 	}
+
+	@Test
+	@DisplayName("알림 설정 페이지")
+	void notificationUpdateForm() throws Exception {
+	    mockMvc.perform(get("/settings/notifications")
+	        .with(user(new UserAccount(account)))
+	    )
+		    .andExpect(status().isOk())
+		    .andExpect(model().attributeExists("account"))
+		    .andExpect(model().attributeExists("notifications"))
+		    .andExpect(view().name("settings/notifications"));
+	}
+
+	@Test
+	@DisplayName("정상적인 알림 설정 수정")
+	void updateNotifications() throws Exception {
+		mockMvc.perform(post("/settings/notifications")
+			.with(user(new UserAccount(account)))
+			.with(csrf())
+			.param("studyCreatedByEmail", "true")
+			.param("studyCreatedByWeb", "true")
+			.param("studyEnrollmentResultByEmail", "true")
+			.param("studyEnrollmentResultByWeb", "true")
+			.param("studyUpdatedByEmail", "true")
+			.param("studyUpdatedByWeb", "true")
+		)
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/settings/notifications"))
+			.andExpect(flash().attributeExists("message"));
+
+		Account updatedAccount = accountRepository.findByNickname("nickname");
+
+		assertThat(updatedAccount.isStudyCreatedByEmail()).isTrue();
+		assertThat(updatedAccount.isStudyCreatedByWeb()).isTrue();
+		assertThat(updatedAccount.isStudyUpdatedByEmail()).isTrue();
+		assertThat(updatedAccount.isStudyUpdatedByWeb()).isTrue();
+		assertThat(updatedAccount.isStudyEnrollmentResultByEmail()).isTrue();
+		assertThat(updatedAccount.isStudyEnrollmentResultByWeb()).isTrue();
+	}
+
+	@Test
+	@DisplayName("잘못된 알림 설정 수정 요청 처리")
+	void updateNotificationsFail() throws Exception {
+	    mockMvc.perform(post("/settings/notifications")
+	        .with(user(new UserAccount(account)))
+		    .with(csrf())
+		    .param("studyCreatedByEmail", "invalid")
+	    )
+		    .andExpect(status().isOk())
+		    .andExpect(model().attributeExists("account"))
+		    .andExpect(model().attributeExists("notifications"))
+		    .andExpect(view().name("settings/notifications"));
+
+	    Account notUpdatedAccount = accountRepository.findByNickname("nickname");
+	    assertThat(notUpdatedAccount.isStudyUpdatedByEmail()).isFalse();
+	}
 }
