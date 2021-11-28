@@ -52,8 +52,8 @@ class SettingsControllerTest {
 			.with(user(new UserAccount(account)))
 		)
 			.andExpect(status().isOk())
-			.andExpect(model().attribute("account", account))
-			.andExpect(model().attribute("profile", new Profile(account)))
+			.andExpect(model().attributeExists("account"))
+			.andExpect(model().attributeExists("profile"))
 			.andExpect(view().name("settings/profile"));
 	}
 
