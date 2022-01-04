@@ -53,10 +53,20 @@ public class AccountService implements UserDetailsService {
 	}
 
 	public void sendSignUpConfirmEmail(Account account) {
+		account.generateEmailCheckToken();
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setSubject("스터디올래, 회원가입 인증!");
 		mailMessage
 			.setText("/check-email-token?token=" + account.getEmailCheckToken() + "&email=" + account.getEmail());
+		javaMailSender.send(mailMessage);
+	}
+
+	public void sendLoginLink(Account account) {
+		account.generateEmailCheckToken();
+		SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setSubject("스터디올래, 이메일 로그인");
+		mailMessage
+			.setText("/login-by-email?token=" + account.getEmailCheckToken() + "&email=" + account.getEmail());
 		javaMailSender.send(mailMessage);
 	}
 

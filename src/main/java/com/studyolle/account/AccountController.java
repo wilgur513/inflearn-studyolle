@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.studyolle.domain.Account;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -87,5 +88,42 @@ public class AccountController {
 		model.addAttribute("account", byNickname);
 		model.addAttribute("isOwner", account.equals(byNickname));
 		return "account/profile";
+	}
+
+	@GetMapping("/email-login")
+	public String emailLoginForm(Model model) {
+		return "account/email-login";
+	}
+
+	@PostMapping("/email-login")
+	public String emailLogin(String email, RedirectAttributes redirectAttributes, Model model) {
+		Account account = accountRepository.findByEmail(email);
+
+		if (account == null) {
+			redirectAttributes.addFlashAttribute("error", "유효한 이메일 주소가 아닙니다.");
+			return "redirect:/email-login";
+		}
+
+		if (!account.canResendEmail()) {
+			redirectAttributes.addFlashAttribute("error", "이메일은 1시간 뒤에 보낼 수 있습니다.");
+			return "redirect:/email-login";
+		}
+
+		accountService.sendLoginLink(account);
+		redirectAttributes.addFlashAttribute("message", "이메일 인증 메일을 발송했습니다.");
+		return "redirect:/email-login";
+	}
+
+	@GetMapping("/login-by-email")
+	public String loginByEmail(String token, String email, Model model) {
+		Account account = accountRepository.findByEmail(email);
+
+		if (account == null || !account.isValidToken(token)) {
+			model.addAttribute("error", "로그인할 수 없습니다.");
+			return "account/logged-in-by-email";
+		}
+
+		accountService.login(account);
+		return "account/logged-in-by-email";
 	}
 }
